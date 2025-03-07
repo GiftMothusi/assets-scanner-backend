@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DepartmentController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AssetController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,6 +23,14 @@ Route::get('/public/departments', [DepartmentController::class, 'publicIndex']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
+
+    Route::apiResource('assets', AssetController::class);
+    Route::post('/assets/scan/{assetCode}', [AssetController::class, 'scan']);
+
+    Route::get('/assets/counts/condition', [AssetController::class, 'countsByCondition']);
+    Route::get('/assets/counts/total', [AssetController::class, 'totalCount']);
+    Route::get('/assets/search', [AssetController::class, 'search']);
+
 
     // Department routes
     Route::apiResource('departments', DepartmentController::class);
