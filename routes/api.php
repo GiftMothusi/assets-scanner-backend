@@ -25,6 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 
     Route::apiResource('assets', AssetController::class);
+    // Route::post('/assets', [AssetController::class, 'store']);
     Route::post('/assets/scan/{assetCode}', [AssetController::class, 'scan']);
 
     Route::get('/assets/counts/condition', [AssetController::class, 'countsByCondition']);

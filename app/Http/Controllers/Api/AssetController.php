@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AssetController extends Controller
 {
@@ -28,7 +29,6 @@ class AssetController extends Controller
             $query->where('current_condition', $request->condition);
         }
 
-        // Paginate results
         $assets = $query->paginate(15);
 
         return response()->json($assets);
@@ -41,6 +41,7 @@ class AssetController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
+            'asset_code' => 'sometimes|string|max:255|unique:assets', // Allow asset_code from request
             'description' => 'nullable|string',
             'purchase_date' => 'nullable|date',
             'purchase_cost' => 'nullable|numeric',
@@ -57,7 +58,7 @@ class AssetController extends Controller
         }
 
         // Generate unique asset code
-        $assetCode = Asset::generateUniqueAssetCode();
+        $assetCode = $request->asset_code ?? Asset::generateUniqueAssetCode();
 
         // Handle image upload
         $imagePath = null;
@@ -65,19 +66,38 @@ class AssetController extends Controller
             $imagePath = $request->file('primary_image')->store('assets/images', 'public');
         }
 
-        $asset = Asset::create([
-            'asset_code' => $assetCode,
-            'name' => $request->name,
-            'description' => $request->description,
-            'purchase_date' => $request->purchase_date,
-            'purchase_cost' => $request->purchase_cost,
-            'expected_lifetime_months' => $request->expected_lifetime_months,
-            'department_id' => $request->department_id,
-            'user_id' => auth()->user() ? auth()->user()->id : null,
-            'primary_image_path' => $imagePath
-        ]);
+        $data = $request->all();
+        $data['asset_code'] = $assetCode;
+        $data['primary_image_path'] = $imagePath;
+        $data['user_id'] = auth()->id();
 
-        return response()->json($asset, 201);
+        // Set default condition if not provided
+        if (!isset($data['current_condition'])) {
+            $data['current_condition'] = 'good';
+        }
+
+        // Set default active status if not provided
+        if (!isset($data['is_active'])) {
+            $data['is_active'] = true;
+        }
+
+
+        try {
+            $asset = Asset::create($data);
+
+            // Log successful creation
+            Log::info('Asset created successfully', ['asset_id' => $asset->id, 'asset_code' => $asset->asset_code]);
+
+            return response()->json($asset, 201);
+        } catch (\Exception $e) {
+            // Log the error
+            Log::error('Error creating asset', ['error' => $e->getMessage(), 'data' => $data]);
+
+            return response()->json([
+                'message' => 'Failed to create asset',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
