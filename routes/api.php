@@ -16,7 +16,9 @@ use App\Http\Controllers\Api\AssetController;
 // Public routes
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
-Route::get('/public/departments', [DepartmentController::class, 'publicIndex']); // Add this line
+Route::get('/public/departments', [DepartmentController::class, 'publicIndex']);
+Route::get('/assets/by-condition', [AssetController::class, 'getByCondition']);
+
 
 
 // Protected routes
@@ -27,6 +29,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('assets', AssetController::class);
     Route::get('/assets/scan/{assetCode}', [AssetController::class, 'getAssetByCode']);
     Route::post('/assets/scan/{assetCode}', [AssetController::class, 'scan']);
+
+    Route::get('/assets/by-department', [AssetController::class, 'assetsByDepartment']);
+    Route::get('/assets/recently-scanned', [AssetController::class, 'recentlyScannedAssets']);
+
 
     Route::get('/assets/counts/condition', [AssetController::class, 'countsByCondition']);
     Route::get('/assets/search', [AssetController::class, 'search']);
@@ -39,5 +45,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/departments/{department}/assets', [DepartmentController::class, 'assets']);
     Route::get('/departments/{department}/users', [DepartmentController::class, 'users']);
 
-    // Other protected API routes will go here
 });

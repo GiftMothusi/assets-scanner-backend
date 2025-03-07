@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Models\Department;
 
 class AssetController extends Controller
 {
@@ -263,5 +264,62 @@ class AssetController extends Controller
         }
 
         return response()->json($asset);
+    }
+
+    public function assetsByDepartment(Request $request)
+    {
+        $departmentName = $request->input('department');
+
+        $department = Department::where('name', $departmentName)->first();
+
+        if (!$department) {
+            return response()->json(['message' => 'Department not found'], 404);
+        }
+        $assets = Asset::where('department_id', $department->id)
+            ->with(['department', 'user'])
+            ->paginate(15);
+
+        return response()->json($assets);
+    }
+
+    public function getByCondition(Request $request)
+    {
+        $conditions = $request->query('condition');
+
+        if (!$conditions) {
+            return response()->json([
+                'message' => 'Condition parameter is required'
+            ], 400);
+        }
+
+        $allowedConditions = ['good', 'fair', 'poor', 'damaged'];
+        $conditions = explode(',', $conditions);
+        $validConditions = array_intersect($allowedConditions, $conditions);
+
+        if (empty($validConditions)) {
+            return response()->json([
+                'message' => 'Invalid condition parameter'
+            ], 400);
+        }
+
+        $assets = Asset::whereIn('current_condition', $validConditions)->paginate(15);
+
+        return response()->json($assets);
+    }
+
+
+    /**
+     * Get recently scanned assets (within the last 30 days)
+     */
+    public function recentlyScannedAssets(Request $request)
+    {
+        $thirtyDaysAgo = now()->subDays(30);
+
+        $assets = Asset::where('last_scanned_at', '>=', $thirtyDaysAgo)
+            ->with(['department', 'user'])
+            ->orderBy('last_scanned_at', 'desc')
+            ->paginate(15);
+
+        return response()->json($assets);
     }
 }
