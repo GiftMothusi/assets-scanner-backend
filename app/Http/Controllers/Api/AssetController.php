@@ -167,6 +167,7 @@ class AssetController extends Controller
         // Update asset condition
         $asset->update([
             'current_condition' => $request->condition,
+            'notes' => $request->notes,
             'last_scanned_at' => now()
         ]);
 
@@ -251,5 +252,16 @@ class AssetController extends Controller
             ->paginate(10);
 
         return response()->json($assets);
+    }
+
+    public function getAssetByCode($assetCode)
+    {
+        $asset = Asset::where('asset_code', $assetCode)->first();
+
+        if (!$asset) {
+            return response()->json(['message' => 'Asset not found'], 404);
+        }
+
+        return response()->json($asset);
     }
 }
