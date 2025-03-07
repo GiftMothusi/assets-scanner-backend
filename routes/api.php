@@ -18,6 +18,7 @@ Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::get('/public/departments', [DepartmentController::class, 'publicIndex']);
 Route::get('/assets/by-condition', [AssetController::class, 'getByCondition']);
+Route::get('/assets/recently-scanned', [AssetController::class, 'recentlyScannedAssets']);
 
 
 
@@ -31,7 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/assets/scan/{assetCode}', [AssetController::class, 'scan']);
 
     Route::get('/assets/by-department', [AssetController::class, 'assetsByDepartment']);
-    Route::get('/assets/recently-scanned', [AssetController::class, 'recentlyScannedAssets']);
+
 
 
     Route::get('/assets/counts/condition', [AssetController::class, 'countsByCondition']);
