@@ -12,7 +12,7 @@ class DepartmentController extends Controller
     /**
      * Display a listing of the departments.
      */
-    public function index()
+    public function publicIndex()
     {
         $departments = Department::all();
         return response()->json($departments);
