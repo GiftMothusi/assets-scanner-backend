@@ -181,39 +181,41 @@ class AssetController extends Controller
     }
 
     /**
- * Get asset counts by department.
- */
-public function countsByDepartment()
-{
-    $counts = DB::table('assets')
-        ->select('departments.name as department_name', DB::raw('count(*) as total'))
-        ->join('departments', 'assets.department_id', '=', 'departments.id')
-        ->groupBy('departments.name', 'assets.department_id')
-        ->get();
+     * Get asset counts by department.
+     */
+    public function countsByDepartment()
+    {
+        $counts = DB::table('assets')
+            ->join('departments', 'assets.department_id', '=', 'departments.id')
+            ->select('departments.name as department_name', DB::raw('count(*) as total'))
+            ->groupBy('departments.name')
+            ->get();
 
-    return response()->json($counts);
-}
+        return response()->json($counts);
+    }
 
 /**
  * Get asset counts by condition.
  */
-public function countsByCondition()
-{
-    $counts = DB::table('assets')
-        ->select('current_condition', DB::raw('count(*) as total'))
-        ->groupBy('current_condition')
-        ->get();
+    public function countsByCondition()
+    {
+        $counts = DB::table('assets')
+            ->select('current_condition', DB::raw('count(*) as total'))
+            ->groupBy('current_condition')
+            ->get();
 
-    return response()->json($counts);
-}
+        return response()->json($counts);
+    }
+
 
     /**
      * Get total asset count.
      */
     public function totalCount()
     {
-        $count = Asset::count();
-        return response()->json(['total' => $count]);
+        $total = Asset::count();
+
+        return response()->json(['total' => $total]);
     }
 
     /**

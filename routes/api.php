@@ -28,8 +28,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/assets/scan/{assetCode}', [AssetController::class, 'scan']);
 
     Route::get('/assets/counts/condition', [AssetController::class, 'countsByCondition']);
-    Route::get('/assets/counts/total', [AssetController::class, 'totalCount']);
     Route::get('/assets/search', [AssetController::class, 'search']);
+    Route::get('/assets/counts/department', [AssetController::class, 'countsByDepartment']);
+    Route::get('/assets/counts/total', [AssetController::class, 'totalCount']);
 
 
     // Department routes
